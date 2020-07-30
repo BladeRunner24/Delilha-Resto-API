@@ -1,0 +1,771 @@
+openapi: 3.0.1
+info:
+  description: >-
+    Documento que contiene la espefificación para la API de "Delilah Restó"
+  version: 1.0.0
+  title: Delilah Restó
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: localhost
+tags:
+  - name: All users
+    description: Operaciones disponibles para todos los usuarios
+  - name: users
+    description: Operaciones solo disponibles para usuarios con rol "user"
+  - name: admin
+    description: Operaciones solo disponibles para usuarios con rol "administrador"
+schemes:
+  - https
+  - http
+paths:
+  /delilha/nuevousuario:
+    post:
+      tags:
+        - All users
+      summary: Creacion de nuevos usuarios
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/definitions/user_register'
+      responses:
+        '201':
+          description: Creado
+          content:
+            text/plain:
+              example: 'Usuario creado!'
+        '400':
+          description: Error en solicitud
+          content:
+            text/plain:
+              example: 'El usuario no pudo ser creado correctamente'
+              /users/login:
+    /delilha/login:              
+    post:
+      tags:
+        - All users
+      summary: Login de usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre_usuario:
+                  type: string
+                  example: "Carlos1"
+                password:
+                  type: string
+                  example: "CM123"
+      responses:
+        '200':
+          description: Logueado exitosamente usuario con rol "administrador"
+          content:
+              text/plain:
+                schema:
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkNhcmxvczEiLCJpYXQiOjE1OTYwMzYyOTV9.ErQVOhHkkp4B1IXkmrj3vhQ29Ifg04b3qrxHaToTo3w'
+        '200':
+          description: Logueado exitosamente usuario con rol "usuario"
+          content:
+              text/plain:
+                schema:
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik9zY2FyMSIsImlhdCI6MTU5NjAzNjE3NH0.wZ4XB9li5R_QDP-WCJeGAgm_ZXjr6d_QZG9uHOsYJ_Y'      
+        '400':
+          description: Bad request
+          content:
+            text/plain:
+              schema:
+                example: 'El usuario o password es incorrecto' 
+  /delilha/vistausuario/{usuario}:
+    get:
+      tags:
+        - users
+      summary: Retorna la informacion del usuario 
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del usuario
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+        - in: path
+          description: ID del usuario
+          required: true
+          schema:
+            type: string
+            example: 'Oscar1'
+      responses:
+        '200':
+          description: Acceso a la informacion del usuario
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/user_information'
+        '401':
+          description: No autorizado
+          content:
+            text/plain:
+              example: 'No tiene acceso a la informacion de otros usuarios!' 
+    /delilha/modusuario:
+    put:
+      tags:
+        - Users
+      summary: Modifica la informacion del usuario con rol "usuario"
+      parameters:
+        parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del usuario
+          required: true
+          schema:
+          $ref: '#/definitions/tokenAuth'
+        requestBody:
+        required: true
+        content:
+          'object':
+            schema:
+              $ref: '#/definitions/modified_user'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'Su usuario a sido modificado!'
+        '400':
+          description: No autenticado
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'La modificacion no pudo realizarse'                               
+  /delilha/usuariovistamenu:
+    get:
+      tags:
+        - Users
+      summary: Retorna lista de productos disponibles
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación obtenido al loguearse
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+      responses:
+        '200':
+          description: Operación exitosa
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/menu_delilha'
+        '400':
+          description: Bad request 
+    /delilha/usuariovistamenu/{plato}:
+    get:
+      tags:
+        - users
+      summary: Retorna la informacion del plato buscado 
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del usuario
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+        - in: path
+          description: Nombre del producto
+          required: true
+          schema:
+            type: string
+            example: 'Bagel de salmon'
+      responses:
+        '200':
+          description: Acceso a la informacion del plato
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/delilha_menu'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              example: 'El plato no existe' 
+        '400':
+          description: Bad request
+    /delilha/nuevousuario:
+    post:
+      tags:
+        - users
+      summary: Creacion de nuevos pedidos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/definitions/pedidos'
+      responses:
+        '201':
+          description: Creado
+          content:
+            text/plain:
+              example: 'Su pedido a sido ingresado!'
+        '400':
+          description: Error en solicitud
+          content:
+            text/plain:
+              example: 'Su pedido no pudo ser ingresado'              
+    /delilha/vistapedidos:
+    get:
+      tags:
+        - Users
+      summary: Retorna lista de pedidos realizados por el usuario
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación obtenido al loguearse
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+      responses:
+        '200':
+          description: Operación exitosa
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/pedidos'
+        '400':
+          description: Bad request 
+  /delilha/usuariovistamenu/{pedido}:
+    get:
+      tags:
+        - users
+      summary: Retorna la informacion del pedido buscado 
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del usuario
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+        - in: path
+          description: codigo de pedido
+          required: true
+          schema:
+            type: string
+            example: '4-91'
+      responses:
+        '200':
+          description: Acceso a la informacion del pedido
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/pedido'        
+        '400':
+          description: 'El pedido no existe o a sucedido un error'
+   /delilha/vistaadm/{usuario}:
+    get:
+      tags:
+        - admin
+      summary: Retorna la informacion del administrador 
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del administrador
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+        - in: path
+          description: ID del administrador
+          required: true
+          schema:
+            type: string
+            example: 'Carlos1'
+      responses:
+        '200':
+          description: Acceso a la informacion del administrador
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/user_information'
+        '401':
+          description: No autorizado
+          content:
+            text/plain:
+              example: 'Desde esta pantalla solo tiene acceso a su informacion'
+        '400':
+          description: Bad request
+    /delilha/modificaradminsistrador:
+    put:
+      tags:
+        - admin
+      summary: Modifica la informacion del usuario con rol "administrador"
+      parameters:
+        parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del administrador
+          required: true
+          schema:
+          $ref: '#/definitions/tokenAuth'
+        requestBody:
+        required: true
+        content:
+          'object':
+            schema:
+              $ref: '#/definitions/usuarios'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'Su usuario a sido modificado!'
+        '400':
+          description: No autenticado
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: ''Su usuario no pudo ser modificado' 
+    /delilha/listausuarios:
+    get:
+      tags:
+        - admin
+      summary: Retorna lista de todos los usuarios (el password no se muestra)
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación obtenido al loguearse
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+      responses:
+        '200':
+          description: Operación exitosa
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/usuarios'
+        '400':
+          description: Bad request
+    /delilha/listausuarios/{user}:
+    get:
+      tags:
+        - users
+      summary: Retorna la informacion del usuario buscado 
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del usuario
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+        - in: path
+          description: Nombre del usuario
+          required: true
+          schema:
+            type: string
+            example: 'Analia23'
+      responses:
+        '200':
+          description: Acceso a la informacion del usuario buscado
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/usuarios'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              example: 'El usuario no existe' 
+        '400':
+          description: Bad request 
+    /delilha/nuevorol/{user}:
+    put:
+      tags:
+        - admin
+      summary: Modifica el rol de un usuario. Tanto para ser usuario como para ser administrador. 
+      parameters:
+        parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del administrador
+          required: true
+          schema:
+          $ref: '#/definitions/tokenAuth'
+        requestBody:
+        required: true
+        content:
+          'object':
+            schema:
+              $ref: '#/definitions/usuarios'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'El rol del usuario 'Oscar1' fue modificado'
+        '400':
+          description: No autenticado
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'El rol del usuario no pudo ser modificado' 
+     /delilha/borradousuarios/{user}:           
+     delete:
+      tags:
+        - admin
+      summary: Elimina un usuario
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del usuario
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+        - in: path
+          description: Nombre del usuario
+          required: true
+          schema:
+            type: string
+            example: 'Analia23'
+      responses:
+        '200':
+          description: Eliminado
+          content:
+            text/plain:
+              example: "El usuario 'Oscar1' fue borrado"
+        '400':
+          description: No autenticado
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'Hubo un error, intente de vuelta'
+    delilha/listaproductos:
+    get:
+      tags:
+        - admin
+      summary: Retorna lista de todos los platos disponibles en el menu 
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del administrador
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+      responses:
+        '200':
+          description: Operación exitosa
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/menu_delilha'
+        '400':
+          description: Bad request     
+    /delilha/nuevorol/{user}:
+    put:
+      tags:
+        - admin
+      summary: Modifica el rol de un usuario. Tanto para ser usuario como para ser administrador. 
+      parameters:
+        parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del administrador
+          required: true
+          schema:
+          $ref: '#/definitions/tokenAuth'
+        requestBody:
+        required: true
+        content:
+          'object':
+            schema:
+              $ref: '#/definitions/usuarios'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'El rol del usuario 'Oscar1' fue modificado'
+        '400':
+          description: No autenticado
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'El rol del usuario no pudo ser modificado' 
+    /delilha/listaproductos/insert:
+    post:
+      tags:
+        - admin
+      summary: Creacion de nuevos platos en el menu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/definitions/menu_delilha'
+      responses:
+        '201':
+          description: Creado
+          content:
+            text/plain:
+              example: 'Plato creado!'
+        '400':
+          description: Error en solicitud
+          content:
+            text/plain:
+              example: 'El plato no fue creado. Intente de vuelta'           
+    /delilha/listaproductos/modify/{id}:
+    put:
+      tags:
+        - admin
+      summary: Modifica la informacion del producto buscado 
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del administrador
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+        - in: path
+          description: Id del producto
+          required: true
+          schema:
+            type: integer
+            example: 4
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'Plato modificado!'
+        '400':
+          description: Bad request
+          content:
+            text/plain:
+              example: 'El plato elegido no pudo ser modificado' 
+     /delilha/menu/borrar/{plato}:           
+     delete:
+      tags:
+        - admin
+      summary: Elimina un producto
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del usuario
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+        - in: path
+          description: Nombre del producto
+          required: true
+          schema:
+            type: string
+            example: 'Pizza de Muzzarela'
+      responses:
+        '200':
+          description: Eliminado
+          content:
+            text/plain:
+              example: 'Plato borrado!'
+        '400':
+          description: Bad request
+    /delilha/vistapedidosadmin:
+    get:
+      tags:
+        - admin
+      summary: Retorna lista de todos los platos pedidos realizados 
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del administrador
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+      responses:
+        '200':
+          description: Operación exitosa
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/pedidos'
+        '400':
+          description: Bad request
+    /delilha/vistapedidosadmin/{pedido}:
+    get:
+      tags:
+        - admin
+      summary: Retorna la informacion del pedido buscado 
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del usuario
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+        - in: path
+          description: Codigo del pedido
+          required: true
+          schema:
+            type: string
+            example: '48-62'
+      responses:
+        '200':
+          description: Acceso a la informacion del pedido buscado
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/pedidos'        
+        '400':
+          description: Bad request
+     /delilha/borrarentradassobrantes:           
+     delete:
+      tags:
+        - admin
+      summary: Elimina las lineas cuya cantidad es 0 en la tabla de pedidos.
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del usuario
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'        
+      responses:
+        '200':
+          description: Eliminado de lineas cuya cantidad es 0
+          content:
+            text/plain:
+              example: 'Las lineas vacias fueron limpiadas de la tabla de pedidos'
+        '400':
+          description: Bad request
+          content:
+     /delilha/eliminarpedido/{pedido}:           
+     delete:
+      tags:
+        - admin
+      summary: Elimina un producto
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del usuario
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+        - in: path
+          description: Codigo de pedido
+          required: true
+          schema:
+            type: string
+            example: '48-62'
+      responses:
+        '200':
+          description: Eliminado
+          content:
+            text/plain:
+              example: 'El pedido fue eliminado'
+        '400':
+          description: Bad request
+          content:
+    /delilha/modificarpedido/{pedido}:
+    put:
+      tags:
+        - admin
+      summary: Modifica la informacion del pedido buscado 
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del administrador
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+        - in: path
+          description: Codigo del pedido
+          required: true
+          schema:
+            type: string
+            example: '4-92'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'El pedido fue modificado'
+        '400':
+          description: Bad request
+          content:
+    /delilha/modificarpedido/{idpedido}:
+    put:
+      tags:
+        - admin
+      summary: Modifica la informacion del pedido buscado 
+      parameters:
+        - in: header
+          name: Authorization
+          description: Token de autenticación del administrador
+          required: true
+          schema:
+            $ref: '#/definitions/tokenAuth'
+        - in: path
+          description: Id de pedido pedido
+          required: true
+          schema:
+            type: integer
+            example: '42'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'El pedido fue modificado'
+        '400':
+          description: Bad request
+          content:  
+
+    tokenAuth:
+    type: string
+    example: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkNhcmxvczEiLCJpYXQiOjE1OTYwNDg0OTZ9.aFv4g56fSdqABiiTWOAqB16VjVIXtZeP3GX3HPbW6aM'  
+                               
+      
+    
+  
+  
